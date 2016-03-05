@@ -40,3 +40,5 @@ install_dotfiles() {
         stow $DOTDIR
     done
 }
+
+add_user && additional_packages && enable_services && install_dotfiles
