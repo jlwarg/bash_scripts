@@ -8,6 +8,9 @@ add_user() {
 }
 
 additional_packages() {
+    # contents of packages file should be the result of
+    # comm -23 <(pacman -Qqen | sort) <(pacman -Qqg base base-devel | sort) > packages_file.txt
+    # on the "source" system
     echo -n "package list file: "
     read PACKAGES_FILE
     if [[ ! -f $PACKAGES_FILE ]]; then
@@ -21,7 +24,20 @@ additional_packages() {
 }
 
 enable_services() {
-    # enable all services
+    # enable all services present on the source system
+    # TODO: get a list of all enabled services on a fully installed system
+    echo -n "service list file: "
+    read SERVICES_FILE
+    if [[ ! -f $SERVICES_FILE ]]; then
+        echo "file $SERVICES_FILE doesn't exist."
+        exit 1
+    else
+        echo "enabling services"
+        SERVICES=$(cat $SERVICES_FILE)
+        for s in $SERVICES; do
+            systemctl enable s
+        done
+    fi
 }
 
 install_dotfiles() {
