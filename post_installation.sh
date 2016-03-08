@@ -26,6 +26,9 @@ additional_packages() {
 enable_services() {
     # enable all services present on the source system
     # TODO: get a list of all enabled services on a fully installed system
+    # services_file will probably contain something like:
+    # systemctl --list-unit-files | grep enabled | awk '{ print $1 }'
+
     echo -n "service list file: "
     read SERVICES_FILE
     if [[ ! -f $SERVICES_FILE ]]; then
