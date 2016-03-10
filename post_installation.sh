@@ -23,6 +23,43 @@ additional_packages() {
     fi
 }
 
+aur_packages() {
+    # aur package file should be the result of
+    # pacman -Qqm
+    # on the "source" system
+    echo -n "directory for aur package files: "
+    read AUR_DIR
+    if [[ ! -d $AUR_DIR ]]; then
+        echo "$AUR_DIR does not exist, creating..."
+        mkdir -p $AUR_DIR
+    fi
+    cd $AUR_DIR
+    echo -n "aur package list file: "
+    read AUR_FILE
+    if [[ ! -f $AUR_FILE ]]; then
+        echo "file $AUR_file doesn't exist."
+        exit 1
+    else
+        # Download tarballs
+        for package in $(cat $AUR_FILE); do
+            curl -L 0O https://aur.archlinux.org/cgit/aur.git/snapshot/$package.tar.gz
+        done
+        # extract packages
+        for tgz in $(echo *.tar.gz); do
+            tar -xvf $tgz
+        done
+        # Build packages
+        echo "building packages..."
+        for dir in $AUR_DIR/*; do
+            echo -n "building $dir..."
+            cd "$dir" && makepkg -sr && cd ..
+            echo "done"
+        done
+        echo "installing packages..."
+        find . -name "*.pkg.tar.xz" -exec pacman -U {} +;
+    fi 
+}
+
 enable_services() {
     # enable all services present on the source system
     # TODO: get a list of all enabled services on a fully installed system
